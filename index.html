@@ -1,0 +1,328 @@
+<html>
+<body>
+
+<script type="text/javascript">
+
+var FPS = 30;
+
+var playerSprite = document.createElement("img");
+playerSprite.src = "assets/bucket.png";
+//document.body.appendChild(playerSprite);
+var bombSprite = document.createElement("img");
+bombSprite.src = "assets/bomb.png";
+var waterSprite = document.createElement("img");
+waterSprite.src = "assets/water.png";
+var backgroundImage = document.createElement("img");
+backgroundImage.src = "assets/background.png";
+var pipesImage = document.createElement("img");
+pipesImage.src = "assets/pipes.png";
+
+var canvas = document.createElement("canvas");
+canvas.width = 800;
+canvas.height = 600;
+
+//canvas.style.border = "1px solid #FF0000";
+canvas.style.position = "absolute";
+canvas.style.left = window.innerWidth/2 - 400;
+canvas.style.top = window.innerHeight/2 - 300;
+
+document.body.appendChild(canvas);
+
+try
+{
+	var context = canvas.getContext("2d");
+}
+catch(key)
+{
+	alert(key.toString());
+}
+
+context.font = "20px Arial";
+context.textAlign = "center";
+
+var LeftArrow = false;
+var RightArrow = false;
+var UpArrow = false;
+var DownArrow = false;
+var KeyA = false;
+var KeyD = false;
+
+var Player1 = {
+	pos_x: 211,
+	pos_y: 527,
+	width: 53,
+	height: 53,
+	score: 0,
+	health: 100,
+	spritesheet: playerSprite,
+	moveLeft: function()
+	{
+		this.pos_x = 150;
+	},
+	moveRight: function()
+	{
+		this.pos_x = 272;
+	},	
+	reset: function()
+	{
+		this.pos_x = 211;
+	},
+	draw: function()
+	{
+		//Character
+		context.drawImage(this.spritesheet, this.pos_x, this.pos_y);
+		//Health Bar
+		context.fillStyle = "rgb(30, 255, 0)";
+		context.fillRect(188, 583, this.health, 15);
+		//Score
+		context.fillStyle = "white";
+		context.fillText(this.score, this.pos_x + 28, this.pos_y + 35);
+	}
+}
+
+var Player2 = {
+	pos_x: 536,
+	pos_y: 527,
+	width: 53,
+	height: 53,
+	score: 0,
+	health: 100,
+	spritesheet: playerSprite,
+	moveLeft: function()
+	{
+		this.pos_x = 475;
+	},
+	moveRight: function()
+	{
+		this.pos_x = 597;
+	},	
+	reset: function()
+	{
+		this.pos_x = 536;
+	},
+	draw: function()
+	{
+		//Character
+		context.drawImage(this.spritesheet, this.pos_x, this.pos_y);
+		//Health Bar
+		context.fillStyle = "rgb(30, 255, 0)";
+		context.fillRect(512, 583, this.health, 15);
+		//Score
+		context.fillStyle = "white";
+		context.fillText(this.score, this.pos_x + 28, this.pos_y + 35);
+	}
+}
+
+var Item = [];
+
+//Type - 0->Water / 1->Bomb
+function addItem(pl, type, pipe)
+{
+	if(type == 0)
+	{
+		var Water = {
+						pos_x: 0,
+						pos_y: 0,
+						width: 30,
+						height: 45,
+						speed: 8,
+						type: 0,
+						water_sprite: waterSprite,
+						drop: function()
+						{
+							if(this.pos_y < 600)
+							{
+								this.pos_y += this.speed;
+							}
+							else
+							{
+								this.pos_y = 0;
+							}
+						},	
+						draw: function()
+						{
+							context.drawImage(this.water_sprite, this.pos_x, this.pos_y);		
+						}
+					};
+		if(pl == 1)
+			Water.pos_x = 158+(pipe*65);
+		if(pl == 2)
+			Water.pos_x = 483+(pipe*65);
+		Item.push(Water);
+	}
+	if(type == 1)
+	{
+		var Bomb = {
+						pos_x: 0,
+						pos_y: 0,
+						width: 30,
+						height: 45,
+						speed: 8,
+						type: 1,
+						bomb_sprite: bombSprite,
+						water_sprite: waterSprite,
+						drop: function()
+						{
+							if(this.pos_y < 600)
+							{
+								this.pos_y += this.speed;
+							}
+							else
+							{
+								this.pos_y = 0;
+								//this.pos_x = Math.floor(Math.random() * 600) + 0;  
+							}
+						},	
+						draw: function()
+						{
+							context.drawImage(this.bomb_sprite, this.pos_x, this.pos_y);
+							
+						}
+					};
+		if(pl == 1)
+			Bomb.pos_x = 158+(pipe*65);
+		if(pl == 2)
+			Bomb.pos_x = 483+(pipe*65);
+		Item.push(Bomb);
+	}
+}
+
+//Itens for test
+addItem(1, 0, 0);
+addItem(1, 1, 1);
+addItem(1, 0, 2);
+
+addItem(2, 0, 0);
+addItem(2, 1, 1);
+addItem(2, 0, 2);
+
+function keydownHandler(key)
+{
+	if(key.keyCode == 37)
+		LeftArrow = true;
+
+	if(key.keyCode == 38)
+		UpArrow = true;
+
+	if(key.keyCode == 39)
+		RightArrow = true;
+
+	if(key.keyCode == 40)
+		DownArrow = true;
+		
+	if(key.keyCode == 65)
+		KeyA = true;
+		
+	if(key.keyCode == 68)
+		KeyD = true;
+}
+
+function keyupHandler(key)
+{
+	if(key.keyCode == 37)
+		LeftArrow = false;
+
+	if(key.keyCode == 38)
+		UpArrow = false;
+
+	if(key.keyCode == 39)
+		RightArrow = false;
+
+	if(key.keyCode == 40)
+		DownArrow = false;
+		
+	if(key.keyCode == 65)
+		KeyA = false;
+		
+	if(key.keyCode == 68)
+		KeyD = false;
+}
+
+if(context != null)
+{
+	setInterval(draw, 1000/FPS);
+	setInterval(update, 1000/FPS);
+
+	document.addEventListener("keydown", keydownHandler);
+	document.addEventListener("keyup", keyupHandler);
+}
+
+function draw()
+{
+	context.clearRect(0,0,canvas.width,canvas.height);
+	context.drawImage(backgroundImage, 0, 0);
+	
+	for(var i = 0; i < Item.length; i++)
+	{
+		Item[i].draw();
+	}
+	
+	Player1.draw();
+	Player2.draw();
+	
+	context.drawImage(pipesImage, 0, 0);
+}
+
+function update()
+{	
+	//Item Events
+	for(var i = 0; i < Item.length; i++)
+	{
+		Item[i].drop();
+		//Collision Water
+		if(Item[i].type == 0)
+		{
+			//Player 1
+			if (Player1.pos_x < Item[i].pos_x + Item[i].width  && Player1.pos_x + Player1.width  > Item[i].pos_x && Player1.pos_y < Item[i].pos_y + Item[i].height && Player1.pos_y + Player1.height > Item[i].pos_y)
+			{
+				Player1.score += 1;
+			}
+			//Player 2
+			if (Player2.pos_x < Item[i].pos_x + Item[i].width  && Player2.pos_x + Player2.width  > Item[i].pos_x && Player2.pos_y < Item[i].pos_y + Item[i].height && Player2.pos_y + Player2.height > Item[i].pos_y)
+			{
+				Player2.score += 1;
+			}
+		}
+		//Collision Bomb
+		if(Item[i].type == 1)
+		{
+			//Player 1
+			if (Player1.pos_x < Item[i].pos_x + Item[i].width  && Player1.pos_x + Player1.width  > Item[i].pos_x && Player1.pos_y < Item[i].pos_y + Item[i].height && Player1.pos_y + Player1.height > Item[i].pos_y)
+			{
+				Player1.health -= 1;
+			}
+			//Player 2
+			if (Player2.pos_x < Item[i].pos_x + Item[i].width  && Player2.pos_x + Player2.width  > Item[i].pos_x && Player2.pos_y < Item[i].pos_y + Item[i].height && Player2.pos_y + Player2.height > Item[i].pos_y)
+			{
+				Player2.health -= 1;
+			}
+		}
+	}
+	
+	//Check Collision Player 1
+	
+	//Keyboard Events
+	if(KeyA == true)
+		Player1.moveLeft();
+
+	if(KeyD == true)
+		Player1.moveRight();
+	
+	if(KeyA == false && KeyD == false)
+		Player1.reset();
+		
+	if(LeftArrow == true)
+		Player2.moveLeft();
+
+	if(RightArrow == true)
+		Player2.moveRight();
+	
+	if(LeftArrow == false && RightArrow == false)
+		Player2.reset();
+}
+
+
+</script>
+
+</body>
+</html>
